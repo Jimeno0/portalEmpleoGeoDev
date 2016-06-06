@@ -94,10 +94,10 @@
 
 	var data = [];
 	$.getJSON("http://www.geodevelopers.org/api/jobs?callback=?", function(datos){
-		console.log(datos);
+
 		data = datos;
 
-		console.log(data);
+
 		var template = $.templates("#theTmpl");
 
 		var htmlOutput = template.render(data);
@@ -113,17 +113,48 @@
 require([
   "esri/Map",
   "esri/views/MapView",
+  "esri/geometry/Point",
+  "esri/symbols/PictureMarkerSymbol",
+  "esri/Graphic",
   "dojo/domReady!"
-], function(Map, MapView){
+], function(Map, MapView,Point,PictureMarkerSymbol,Graphic){
   var map = new Map({
     basemap: "streets"
   });
   var view = new MapView({
     container: "viewDiv",  // Reference to the scene div created in step 5
     map: map,  // Reference to the map object created before the scene
-    zoom: 4,  // Sets the zoom level based on level of detail (LOD)
+    zoom: 7,  // Sets the zoom level based on level of detail (LOD)
     center: [-3, 40]  // Sets the center point of view in lon/lat
   });
+  var symbol = new PictureMarkerSymbol({
+	  url: "http://desarrolladores.esri.es/wp-content/uploads/images/ArcGIS%20PIN%20ICON.png",
+	  width: 10,
+	  height: 20,
+	  yoffset: 7
+
+	  // ****************************************
+	  // A VECES NO LLEGA EL  VAR DATA DEL CALLBACK DE LA LLAMADA A TIEMPO
+	  // Y AL ESTAR VACÍO NO LO PINTA
+	  // ****************************************
+	});
+  for (i = 0; i < data.length; i++) {
+  	var lat = data[i].location_lat;
+  	var long = data[i].location_lon;
+  	var jobID = data[i].id;
+    var point = new Point({
+ 			longitude: long,
+      latitude: lat
+    });
+    var pointGraphic = new Graphic({
+      geometry: point,
+      symbol: symbol,
+      attributes: {
+			  "id": jobID,
+			}
+    });
+  	view.graphics.add(pointGraphic);
+  }
 });
 </script>
 
